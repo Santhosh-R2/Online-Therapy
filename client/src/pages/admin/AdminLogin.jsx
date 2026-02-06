@@ -115,6 +115,7 @@ const AdminLogin = () => {
                   required
                   value={adminData.email}
                   onChange={(e) => setAdminData({ ...adminData, email: e.target.value })}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -131,6 +132,7 @@ const AdminLogin = () => {
                   required
                   value={adminData.password}
                   onChange={(e) => setAdminData({ ...adminData, password: e.target.value })}
+                  autoComplete="off"
                 />
                 <div className="admin-login-pw-toggle" onClick={() => setShowPass(!showPass)}>
                   {showPass ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}

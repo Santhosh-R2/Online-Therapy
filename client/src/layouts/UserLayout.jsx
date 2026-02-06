@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, IconButton, Typography, List,
-  ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, 
+  ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar,
   Badge, Menu, MenuItem, Divider, useMediaQuery, useTheme, Chip
 } from '@mui/material';
 import gsap from 'gsap';
@@ -16,6 +16,7 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import FaceRoundedIcon from '@mui/icons-material/FaceRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import MoreTimeRoundedIcon from '@mui/icons-material/MoreTimeRounded';
 
 import '../styles/UserLayout.css';
@@ -30,13 +31,14 @@ const UserLayout = () => {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  
+
   const user = JSON.parse(localStorage.getItem('user')) || { role: 'user', name: 'Guest' };
   const role = user.role;
 
   const userLinks = [
     { text: 'Dashboard', icon: <DashboardRoundedIcon />, path: '/user-dashboard' },
     { text: 'AI Companion', icon: <AutoAwesomeRoundedIcon />, path: '/user/ai-chat' },
+    { text: 'Robot Therapist', icon: <SmartToyRoundedIcon />, path: '/user/robot-ai' },
     { text: 'Book Session', icon: <EventAvailableRoundedIcon />, path: '/user/book' },
     { text: 'Appointments', icon: <FolderSpecialRoundedIcon />, path: '/user/appointments' },
     { text: 'Mood Tracker', icon: <FaceRoundedIcon />, path: '/user/mood' },
@@ -44,7 +46,7 @@ const UserLayout = () => {
 
   const counselorLinks = [
     { text: 'Overview', icon: <DashboardRoundedIcon />, path: '/counselor-dashboard' },
-    { text: 'Availability', icon: <MoreTimeRoundedIcon />, path: '/counselor/availability' }, 
+    { text: 'Availability', icon: <MoreTimeRoundedIcon />, path: '/counselor/availability' },
     { text: 'My Clients', icon: <PsychologyRoundedIcon />, path: '/counselor/clients' },
     { text: 'My Schedule', icon: <EventAvailableRoundedIcon />, path: '/counselor/schedule' },
   ];
@@ -69,12 +71,12 @@ const UserLayout = () => {
       </div>
 
       <Box sx={{ px: 3, my: 3 }}>
-        <Chip 
-          label={role === 'counselor' ? 'PROFESSIONAL' : 'MEMBER'} 
+        <Chip
+          label={role === 'counselor' ? 'PROFESSIONAL' : 'MEMBER'}
           className="user-role-chip"
         />
       </Box>
-      
+
       <List className="user-menu-list">
         {currentMenu.map((item) => (
           <ListItem key={item.text} disablePadding>
@@ -86,9 +88,9 @@ const UserLayout = () => {
               }}
             >
               <ListItemIcon className="user-menu-icon">{item.icon}</ListItemIcon>
-              <ListItemText 
-                primary={item.text} 
-                primaryTypographyProps={{ fontWeight: 700, fontSize: '0.85rem' }} 
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{ fontWeight: 700, fontSize: '0.85rem' }}
               />
               {location.pathname === item.path && <div className="user-active-indicator" />}
             </ListItemButton>
@@ -114,14 +116,14 @@ const UserLayout = () => {
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         ModalProps={{ keepMounted: true }}
-        sx={{ 
-          display: { xs: 'block', lg: 'none' }, 
-          '& .MuiDrawer-paper': { 
-            width: drawerWidth, 
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
             bgcolor: '#0F172A', // FORCE NAVY
             border: 'none',
-            boxShadow: '15px 0 30px rgba(0,0,0,0.4)' 
-          } 
+            boxShadow: '15px 0 30px rgba(0,0,0,0.4)'
+          }
         }}
       >
         {SidebarContent}
@@ -130,7 +132,7 @@ const UserLayout = () => {
       {/* DESKTOP SIDEBAR */}
       <Box sx={{ display: { xs: 'none', lg: 'block' }, width: drawerWidth, flexShrink: 0 }}>
         <Box className="user-sidebar-persistent">
-            {SidebarContent}
+          {SidebarContent}
         </Box>
       </Box>
 
@@ -148,15 +150,15 @@ const UserLayout = () => {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box 
+              <Box
                 onClick={(e) => setAnchorEl(e.currentTarget)}
                 className="user-profile-pill"
               >
-                <Avatar 
-                  src={user.profileImage ? `http://localhost:5000/${user.profileImage.replace(/\\/g, '/')}` : ''} 
+                <Avatar
+                  src={user.profileImage ? `http://localhost:5000/${user.profileImage.replace(/\\/g, '/')}` : ''}
                   sx={{ width: 35, height: 35, border: '2px solid #3B82F6', bgcolor: '#3B82F6' }}
                 >
-                    {user.name?.charAt(0)}
+                  {user.name?.charAt(0)}
                 </Avatar>
                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                   <Typography variant="subtitle2" fontWeight="900" lineHeight={1} color="#0F172A">{user.name}</Typography>
@@ -164,12 +166,12 @@ const UserLayout = () => {
                 </Box>
               </Box>
 
-              <Menu 
-                anchorEl={anchorEl} 
-                open={Boolean(anchorEl)} 
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }} 
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 PaperProps={{ className: 'user-profile-menu' }}
               >
                 <MenuItem onClick={() => { navigate('/profile'); setAnchorEl(null); }}>Account Settings</MenuItem>

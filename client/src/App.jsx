@@ -26,6 +26,7 @@ import AvailabilitySettings from './pages/user/AvailabilitySettings';
 import MyClient from './pages/user/MyClient';
 import CounselorDashboard from './pages/user/CounselorDashboard';
 import UserDashboard from './pages/user/UserDashboard';
+import RobotAi from './pages/user/RobotAi';
 import ViewAllAppoinment from './pages/admin/ViewAllAppoinment';
 import Resources from './pages/admin/Resources';
 import AdminReport from './pages/admin/AdminReport';
@@ -55,7 +56,7 @@ function App() {
       <Routes>
         <Route path="/" element={<><Navbar /><LandingPage /><Footer /></>} />
         <Route path="/about" element={<><Navbar /><AboutUs /><Footer /></>} />
-        <Route path="/contact" element={<><Navbar /><ContactUs /><Footer /></>} />
+        <Route path="/contactus" element={<><Navbar /><ContactUs /><Footer /></>} />
 
         <Route path="/admin/login" element={<><Navbar /><AdminLogin /><Footer /></>} />
         <Route path="/login" element={<><Navbar /><UserLogin /><Footer /></>} />
@@ -82,6 +83,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/user/ai-chat" element={<Aichat />} />
+          <Route path="/user/robot-ai" element={<RobotAi />} />
           <Route path="/user/book" element={<BookAppoinment />} />
           <Route path="/user/appointments" element={<ViewAppoinment />} />
           <Route path="/user/mood" element={<MoodTracker />} />

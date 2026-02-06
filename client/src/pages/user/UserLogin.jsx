@@ -191,6 +191,7 @@ const UserLogin = () => {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
+                  autoComplete="off"
                 />
               </div>
             </div>
@@ -208,6 +209,7 @@ const UserLogin = () => {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
+                  autoComplete="off"
                 />
                 <div className="user-login-pw-toggle" onClick={() => setShowPw(!showPw)}>
                   {showPw ? <VisibilityOffOutlinedIcon fontSize="small" /> : <VisibilityOutlinedIcon fontSize="small" />}

@@ -1,6 +1,6 @@
 const ChatMessage = require('../models/ChatMessage');
 const Resource = require('../models/Resource');
-const MoodLog = require('../models/MoodLog'); 
+const MoodLog = require('../models/MoodLog');
 
 const Groq = require("groq-sdk");
 
@@ -13,14 +13,15 @@ const calculateMoodScore = (sentimentScore) => {
     if (sentimentScore >= -0.5) return 2; // Bad
     return 1; // Awful
 };
-const SYSTEM_PROMPT = `
+const SYSTEM_PROMPT = (lang) => `
 You are MindHeal AI Companion, an empathetic mental health assistant.
 Instructions:
-- Provide supportive, non-judgmental, and short responses.
+- Provide supportive, non-judgmental, and short responses in ${lang || 'English'}.
 - If the user is in danger, provide emergency resources.
 - Response MUST be valid JSON only.
+- Ensure the "reply" field is in ${lang || 'English'}.
 {
-  "reply": "Empathetic text",
+  "reply": "Empathetic text in ${lang || 'English'}",
   "sentiment": { "score": 0.5, "label": "Positive" },
   "detectedEmotion": "Anxiety", 
   "suggestedAction": "Breathing Exercise"
@@ -29,7 +30,7 @@ Instructions:
 
 exports.chat = async (req, res) => {
     try {
-        const { message } = req.body;
+        const { message, language } = req.body;
         const userId = req.user ? req.user.id : null;
 
         if (!message) return res.status(400).json({ error: 'Message is required' });
@@ -41,22 +42,22 @@ exports.chat = async (req, res) => {
         try {
             const chatCompletion = await groq.chat.completions.create({
                 messages: [
-                    { role: "system", content: SYSTEM_PROMPT },
+                    { role: "system", content: SYSTEM_PROMPT(language) },
                     { role: "user", content: message }
                 ],
                 // Using Llama 3 70B for best emotional intelligence
-                model: "openai/gpt-oss-120b", 
+                model: "llama-3.3-70b-versatile",
                 temperature: 0.6,
                 max_tokens: 500,
                 response_format: { type: "json_object" }
             });
 
             const rawContent = chatCompletion.choices[0].message.content;
-            
+
             // Clean Markdown if present (e.g. ```json ... ```)
             const cleanJson = rawContent.replace(/```json|```/g, '').trim();
             finalResponse = JSON.parse(cleanJson);
-            
+
             usedSource = "Groq (Llama 3)";
         } catch (err) {
             console.error("AI API Failed, using local fallback:", err.message);
@@ -73,12 +74,12 @@ exports.chat = async (req, res) => {
         if (userId && finalResponse.detectedEmotion && finalResponse.detectedEmotion !== "Neutral") {
             try {
                 const score = calculateMoodScore(finalResponse.sentiment.score);
-                
+
                 // Estimate Energy Level
                 let energy = 5;
                 const highEnergy = ['Anger', 'Excitement', 'Panic', 'Joy', 'Stress', 'Anxiety'];
                 const lowEnergy = ['Sadness', 'Depression', 'Fatigue', 'Boredom', 'Grief'];
-                
+
                 if (highEnergy.some(e => finalResponse.detectedEmotion.includes(e))) energy = 8;
                 if (lowEnergy.some(e => finalResponse.detectedEmotion.includes(e))) energy = 3;
 
@@ -140,7 +141,7 @@ exports.chat = async (req, res) => {
         res.json({
             success: true,
             ...finalResponse,
-            suggestedItems, 
+            suggestedItems,
             moodLogged, // Let frontend know we saved the mood
             _source: usedSource
         });

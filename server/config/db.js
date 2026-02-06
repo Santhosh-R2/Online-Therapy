@@ -1,11 +1,19 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/OnlineTherapy")
 
-var db=mongoose.connection
+const connectDB = async () => {
+    try {
+        // Check if URI exists
+        const dbUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+        if (!dbUri) {
+            throw new Error("MONGO_URI is not defined in .env file");
+        }
 
-db.on("error",console.error.bind(console,"connection error:"))
-db.once("open",function(){
-    console.log("Connected to MongoDB")
-})
+        const conn = await mongoose.connect(dbUri);
+        console.log(`Connected to MongoDB: ${conn.connection.host}`);
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1); // Stop the server if DB fails
+    }
+};
 
-module.exports=db
+module.exports = connectDB;
