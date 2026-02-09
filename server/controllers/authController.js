@@ -98,6 +98,7 @@ exports.adminLogin = async (req, res) => {
     if (email === "admin@mindheal.com" && password === "admin123") {
         const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1d' });
         return res.status(200).json({ success: true, token, role: 'admin' });
+        
     }
     res.status(401).json({ message: "Invalid Admin Access" });
 };

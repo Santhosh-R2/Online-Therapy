@@ -3,7 +3,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, IconButton, Typography, List,
   ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar,
-  Badge, Menu, MenuItem, Divider, useMediaQuery, useTheme, Chip
+  Badge, Menu, MenuItem, Divider, useMediaQuery, useTheme, Chip,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button
 } from '@mui/material';
 import gsap from 'gsap';
 
@@ -18,6 +19,7 @@ import FaceRoundedIcon from '@mui/icons-material/FaceRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import MoreTimeRoundedIcon from '@mui/icons-material/MoreTimeRounded';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 
 import '../styles/UserLayout.css';
 
@@ -31,6 +33,9 @@ const UserLayout = () => {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  
+  // --- NEW: LOGOUT MODAL STATE ---
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user')) || { role: 'user', name: 'Guest' };
   const role = user.role;
@@ -57,8 +62,16 @@ const UserLayout = () => {
     gsap.fromTo(".user-page-body", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
   }, [location.pathname]);
 
-  const handleLogout = () => {
+  // --- HANDLER: OPEN MODAL ---
+  const handleLogoutClick = () => {
+    setAnchorEl(null); // Close dropdown if open
+    setLogoutOpen(true);
+  };
+
+  // --- HANDLER: CONFIRM LOGOUT ---
+  const handleLogoutConfirm = () => {
     localStorage.clear();
+    setLogoutOpen(false);
     navigate('/login');
   };
 
@@ -100,7 +113,8 @@ const UserLayout = () => {
 
       <Box sx={{ p: 3, mt: 'auto' }}>
         <Divider sx={{ bgcolor: 'rgba(255,255,255,0.05)', mb: 2 }} />
-        <ListItemButton onClick={handleLogout} className="user-logout-btn">
+        {/* UPDATED: Calls handleLogoutClick instead of direct logout */}
+        <ListItemButton onClick={handleLogoutClick} className="user-logout-btn">
           <ListItemIcon sx={{ color: 'inherit', minWidth: '40px' }}><LogoutRoundedIcon /></ListItemIcon>
           <ListItemText primary="Logout Session" primaryTypographyProps={{ fontWeight: 700, fontSize: '0.85rem' }} />
         </ListItemButton>
@@ -120,7 +134,7 @@ const UserLayout = () => {
           display: { xs: 'block', lg: 'none' },
           '& .MuiDrawer-paper': {
             width: drawerWidth,
-            bgcolor: '#0F172A', // FORCE NAVY
+            bgcolor: '#0F172A',
             border: 'none',
             boxShadow: '15px 0 30px rgba(0,0,0,0.4)'
           }
@@ -176,7 +190,8 @@ const UserLayout = () => {
               >
                 <MenuItem onClick={() => { navigate('/profile'); setAnchorEl(null); }}>Account Settings</MenuItem>
                 <Divider />
-                <MenuItem onClick={handleLogout} sx={{ color: '#EF4444', fontWeight: 800 }}>Sign Out</MenuItem>
+                {/* UPDATED: Calls handleLogoutClick */}
+                <MenuItem onClick={handleLogoutClick} sx={{ color: '#EF4444', fontWeight: 800 }}>Sign Out</MenuItem>
               </Menu>
             </Box>
           </Toolbar>
@@ -186,6 +201,51 @@ const UserLayout = () => {
           <Outlet />
         </main>
       </Box>
+
+      {/* --- LOGOUT CONFIRMATION MODAL --- */}
+      <Dialog
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        PaperProps={{
+          style: { borderRadius: 20, width: '400px' }
+        }}
+      >
+        <Box sx={{ textAlign: 'center', pt: 2 }}>
+          <WarningAmberRoundedIcon sx={{ fontSize: 48, color: '#f59e0b' }} />
+        </Box>
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 800, color: '#0F172A' }}>
+          Sign Out?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ textAlign: 'center', color: '#64748B', fontSize: '0.95rem' }}>
+            You will need to login again to access your dashboard. Are you sure you want to proceed?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3, gap: 2 }}>
+          <Button 
+            onClick={() => setLogoutOpen(false)} 
+            sx={{ color: '#64748B', fontWeight: 700, textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleLogoutConfirm} 
+            variant="contained" 
+            sx={{ 
+              bgcolor: '#EF4444', 
+              color: 'white', 
+              fontWeight: 700, 
+              textTransform: 'none', 
+              borderRadius: '10px',
+              padding: '8px 24px',
+              '&:hover': { bgcolor: '#DC2626' }
+            }}
+          >
+            Yes, Sign Out
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 };

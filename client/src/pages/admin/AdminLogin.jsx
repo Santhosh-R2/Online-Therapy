@@ -111,7 +111,7 @@ const AdminLogin = () => {
                 <input
                   type="email"
                   className="admin-login-input-control"
-                  placeholder="admin@mindheal.com"
+                  placeholder="Enter your email"
                   required
                   value={adminData.email}
                   onChange={(e) => setAdminData({ ...adminData, email: e.target.value })}

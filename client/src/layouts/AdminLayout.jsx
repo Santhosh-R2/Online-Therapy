@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, AppBar, Toolbar, IconButton, Typography, List,
   ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, 
-  Badge, Menu, MenuItem, Divider, useMediaQuery, useTheme
+  Badge, Menu, MenuItem, Divider, useMediaQuery, useTheme,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button
 } from '@mui/material';
 import gsap from 'gsap';
-import api from '../services/api'; // Import API
+import api from '../services/api'; 
 
 // Icons
 import MenuIcon from '@mui/icons-material/Menu';
@@ -19,7 +20,8 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import MailIcon from '@mui/icons-material/Mail'; // New Icon for Messages
+import MailIcon from '@mui/icons-material/Mail';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 
 import '../styles/AdminLayout.css';
 
@@ -34,8 +36,9 @@ const AdminLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   
-  // --- NEW STATE FOR NOTIFICATIONS ---
+  // --- STATE FOR NOTIFICATIONS & MODAL ---
   const [pendingCount, setPendingCount] = useState(0);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin-dashboard' },
@@ -54,11 +57,10 @@ const AdminLayout = () => {
     );
   }, [location.pathname]);
 
-  // --- FETCH PENDING MESSAGES COUNT ---
+  // --- FETCH NOTIFICATIONS ---
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        // Fetch only pending messages to get the count
         const res = await api.get('/contact?status=pending');
         if (res.data.success) {
           setPendingCount(res.data.count);
@@ -68,14 +70,21 @@ const AdminLayout = () => {
       }
     };
     fetchNotifications();
-  }, [location.pathname]); // Re-fetch when page changes (e.g. after reading a msg)
+  }, [location.pathname]);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
   const handleProfileMenu = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const handleLogout = () => {
+  // --- LOGOUT HANDLERS ---
+  const handleLogoutClick = () => {
+    setAnchorEl(null); // Close dropdown if open
+    setLogoutOpen(true); // Open Modal
+  };
+
+  const handleLogoutConfirm = () => {
     localStorage.clear();
+    setLogoutOpen(false);
     navigate('/admin/login');
   };
 
@@ -99,7 +108,6 @@ const AdminLayout = () => {
               }}
             >
               <ListItemIcon className="admin-menu-icon">
-                {/* Show badge on sidebar icon too if it's the Messages tab */}
                 {item.text === 'Messages' && pendingCount > 0 ? (
                     <Badge badgeContent={pendingCount} color="error" sx={{'& .MuiBadge-badge': {fontSize: '0.6rem', height: 16, minWidth: 16}}}>
                         {item.icon}
@@ -118,7 +126,8 @@ const AdminLayout = () => {
 
       <Box sx={{ p: 3, mt: 'auto' }}>
         <Divider sx={{ bgcolor: 'rgba(255,255,255,0.08)', mb: 2 }} />
-        <ListItemButton onClick={handleLogout} className="admin-logout-btn">
+        {/* Updated Logout Button in Sidebar */}
+        <ListItemButton onClick={handleLogoutClick} className="admin-logout-btn">
           <ListItemIcon sx={{ color: 'inherit', minWidth: '40px' }}><LogoutIcon /></ListItemIcon>
           <ListItemText primary="Logout Session" primaryTypographyProps={{ fontWeight: 700, fontSize: '0.85rem' }} />
         </ListItemButton>
@@ -169,11 +178,10 @@ const AdminLayout = () => {
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 3 } }}>
               
-              {/* --- NOTIFICATION BELL --- */}
               <IconButton 
                 color="inherit" 
                 className="nav-icon-btn"
-                onClick={() => navigate('/admin/contact')} // NAVIGATE TO CONTACT PAGE
+                onClick={() => navigate('/admin/contact')}
               >
                 <Badge badgeContent={pendingCount} color="error">
                   <NotificationsIcon />
@@ -198,7 +206,8 @@ const AdminLayout = () => {
                 <MenuItem onClick={handleClose}>Admin Profile</MenuItem>
                 <MenuItem onClick={handleClose}>Security Settings</MenuItem>
                 <Divider />
-                <MenuItem onClick={handleLogout} sx={{ color: '#ef4444', fontWeight: 800 }}>Logout</MenuItem>
+                {/* Updated Logout Button in Menu */}
+                <MenuItem onClick={handleLogoutClick} sx={{ color: '#ef4444', fontWeight: 800 }}>Logout</MenuItem>
               </Menu>
             </Box>
           </Toolbar>
@@ -208,6 +217,51 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </Box>
+
+      {/* --- LOGOUT CONFIRMATION MODAL --- */}
+      <Dialog
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        PaperProps={{
+          style: { borderRadius: 20, padding: '10px', width: '400px' }
+        }}
+      >
+        <Box sx={{ textAlign: 'center', pt: 2 }}>
+          <WarningAmberRoundedIcon sx={{ fontSize: 48, color: '#ef4444' }} />
+        </Box>
+        <DialogTitle sx={{ textAlign: 'center', fontWeight: 900, color: '#0f172a' }}>
+          Terminate Session?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ textAlign: 'center', color: '#64748B', fontSize: '0.95rem' }}>
+            You are about to log out of the Admin Console. You will need to re-authenticate to access system data.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3, gap: 2 }}>
+          <Button 
+            onClick={() => setLogoutOpen(false)} 
+            sx={{ color: '#64748B', fontWeight: 700, textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleLogoutConfirm} 
+            variant="contained" 
+            sx={{ 
+              bgcolor: '#EF4444', 
+              color: 'white', 
+              fontWeight: 700, 
+              textTransform: 'none', 
+              borderRadius: '10px',
+              padding: '8px 24px',
+              '&:hover': { bgcolor: '#DC2626' }
+            }}
+          >
+            Yes, Log Out
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 };
